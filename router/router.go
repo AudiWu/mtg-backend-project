@@ -12,6 +12,7 @@ func Serve() {
 
 	publicRoutes := router.Group("/user")
 	publicRoutes.POST("/create", controller.CreateUser)
+	publicRoutes.GET("/find/:username", controller.FindUser)
 
 	// for third party api
 	// router.GET("/land-types", func(c *gin.Context) {
