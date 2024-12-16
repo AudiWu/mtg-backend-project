@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/AudiWu/mtg-backend-project/model"
+	"github.com/AudiWu/mtg-backend-project/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,36 +15,28 @@ func CreateUser(c *gin.Context) {
 	var input model.User
 
 	if err := c.ShouldBindBodyWithJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   err.Error(),
-			"message": "Error validating input",
-		})
+		res := utils.ApiErrorResponse(http.StatusBadRequest, "Error validating input", err.Error())
+		c.JSON(http.StatusBadRequest, res)
 		return
 	}
-
+	
 	user, _ := input.FindUser(input.Username)
-
+	
 	if user.Username != "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "User already exists",
-			"message": "User already exists",
-		})
+		res := utils.ApiErrorResponse(http.StatusBadRequest, "user already exists", nil)
+		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
 	err := input.Create()
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   err.Error(),
-			"message": "Error creating user!",
-		})
+		res := utils.ApiErrorResponse(http.StatusInternalServerError, "Error creating user!", err.Error())
+		c.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Create user success!",
-	})
+	c.JSON(http.StatusOK, nil)
 }
 
 func FindUser(c *gin.Context) {
@@ -56,15 +49,11 @@ func FindUser(c *gin.Context) {
 	user, err := input.FindUser(username)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   err.Error(),
-			"message": "Error getting user!",
-		})
+		res := utils.ApiErrorResponse(http.StatusInternalServerError,  "Error getting user!", err.Error())
+		c.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data":    user,
-		"message": "Find user success!",
-	})
+	res := utils.ApiResponse(http.StatusOK, user)
+	c.JSON(http.StatusOK, res)
 }
